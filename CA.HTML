@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Netflix Clone — Demo</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0b0b0b;
+      --card:#141414;
+      --muted:#bdbdbd;
+      --accent:#e50914;
+      --glass: rgba(255,255,255,0.04);
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#050505 0%, #0f0f0f 80%);color:#fff;min-height:100vh}
+    header{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;position:sticky;top:0;background:linear-gradient(180deg, rgba(0,0,0,0.6), transparent);backdrop-filter: blur(4px);z-index:40}
+    .logo{display:flex;gap:12px;align-items:center}
+    .logo .brand{font-weight:800;font-size:22px;letter-spacing:1px;color:var(--accent)}
+    .nav{display:flex;gap:14px;align-items:center}
+    .nav a{color:var(--muted);text-decoration:none;font-size:14px}
+    .nav a:hover{color:#fff}
+
+    .hero{padding:28px 40px 60px;display:flex;gap:24px;align-items:flex-end}
+    .hero-left{flex:1;max-width:720px}
+    .title{font-size:48px;margin:0 0 12px}
+    .desc{color:var(--muted);line-height:1.4;margin:0 0 18px}
+    .hero-actions{display:flex;gap:12px}
+    .btn{background:#fff;color:#000;padding:10px 18px;border-radius:6px;font-weight:600;border:none;cursor:pointer}
+    .btn.alt{background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.12)}
+
+    .hero-poster{width:320px;flex-shrink:0;border-radius:8px;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,0.6)}
+    .hero-poster img{display:block;width:100%;height:100%;object-fit:cover}
+
+    .section{padding:18px 40px}
+    .section h3{margin:6px 0 12px}
+
+    .row{display:flex;gap:12px;overflow:auto;padding-bottom:12px;scroll-snap-type:x mandatory}
+    .card{min-width:180px;flex:0 0 auto;border-radius:8px;overflow:hidden;background:var(--card);cursor:pointer;transition:transform .2s ease;scroll-snap-align:start}
+    .card img{width:100%;height:260px;object-fit:cover;display:block}
+    .card .meta{padding:8px 10px}
+    .card .meta h4{margin:0;font-size:14px}
+    .card:hover{transform:translateY(-8px)}
+
+    /* responsive */
+    @media (max-width:900px){
+      .title{font-size:32px}
+      .hero{flex-direction:column;align-items:flex-start}
+      .hero-poster{width:100%;height:360px}
+      .card img{height:180px}
+    }
+
+    /* modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;padding:20px;z-index:80}
+    .modal{background:linear-gradient(180deg, rgba(20,20,20,0.98), rgba(10,10,10,0.98));max-width:940px;width:100%;border-radius:10px;overflow:hidden}
+    .modal .modal-body{display:flex;gap:18px}
+    .modal .left{flex:1}
+    .modal .right{width:300px;padding:18px}
+    .close{position:absolute;right:18px;top:12px;background:transparent;border:none;color:#fff;font-size:20px;cursor:pointer}
+
+    /* simple search */
+    .search{display:flex;align-items:center;border-radius:8px;padding:8px 12px;background:var(--glass);border:1px solid rgba(255,255,255,0.04)}
+    .search input{background:transparent;border:0;outline:none;color:#fff;width:220px}
+
+    footer{padding:28px 40px;color:var(--muted);font-size:13px}
+
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <img src="https://dummyimage.com/48x32/e50914/fff.png&text=N" alt="logo" style="height:32px;border-radius:4px;">
+      <div class="brand">Cloneflix
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="#">Home</a>
+      <a href="#">Movies</a>
+      <a href="#">Series</a>
+      <a href="#">My List</a>
+      <div class="search" style="margin-left:18px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="opacity:.8;margin-right:8px"><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.8"></circle></svg>
+        <input id="searchInput" placeholder="Search movies, shows..." />
+      </div>
+    </nav>
+
+    <div style="display:flex;gap:12px;align-items:center">
+      <button class="btn alt" id="profileBtn">Sign In</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-left">
+        <h1 class="title">Watch something amazing.</h1>
+        <p class="desc">A small Netflix-style demo — browse the gallery, click a card to see details, and press Play to watch a trailer (YouTube).</p>
+        <div class="hero-actions">
+          <button class="btn" id="playMain">Play</button>
+          <button class="btn alt" id="moreInfo">More Info</button>
+        </div>
+      </div>
+      <div class="hero-poster">
+        <img src="https://images.unsplash.com/photo-1542204637-8a7f1fbd9f0b?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=0d259f0b6c6f1a5f9f0c5b0c63d7f5d6" alt="hero">
+      </div>
+    </section>
+
+    <section class="section">
+      <h3>Popular on Cloneflix
+      </h3>
+      <div class="row" id="popularRow"></div>
+    </section>
+
+    <section class="section">
+      <h3>Trending Now</h3>
+      <div class="row" id="trendingRow"></div>
+    </section>
+
+    <section class="section">
+      <h3>New Releases</h3>
+      <div class="row" id="newRow"></div>
+    </section>
+
+  </main>
+
+  <footer>
+    This is a demo for learning and practice — not affiliated with Netflix.
+  </footer>
+
+  <!-- modal -->
+  <div class="modal-backdrop" id="modal">
+    <div class="modal">
+      <button class="close" id="closeModal">✕</button>
+      <div class="modal-body">
+        <div class="left">
+          <div id="videoWrap" style="background:#000;height:380px;display:flex;align-items:center;justify-content:center;color:var(--muted)">Trailer will play here</div>
+        </div>
+        <div class="right">
+          <h3 id="mTitle">Title</h3>
+          <p id="mDesc" style="color:var(--muted);font-size:14px">Description</p>
+          <div style="margin-top:12px">
+            <strong>Rating:</strong> <span id="mRating">PG-13</span>
+          </div>
+          <div style="margin-top:18px">
+            <button class="btn" id="playTrailer">Play Trailer</button>
+            <button class="btn alt" id="addList">+ My List</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // sample data — replace posters/trailers with your own
+    const movies = [
+      {id:1,title:'Midnight Escape',year:2024,poster:'https://images.unsplash.com/photo-1517604931442-0be9d0af1f18?q=80&w=600&auto=format&fit=crop&ixlib=rb-4.0.3&s=6a5b8e8a2d8c9b3a0f',desc:'A gripping thriller about a small-town heist.',rating:'PG-13',trailer:'https://www.youtube.com/embed/2Xc9gXyf2G4'},
+      {id:2,title:'Ocean of Stars',year:2023,poster:'https://images.unsplash.com/photo-1470770903676-69b98201ea1c?q=80&w=600&auto=format&fit=crop&ixlib=rb-4.0.3&s=2a7a3b4f9c',desc:'A romantic journey across the seas.',rating:'PG',trailer:'https://www.youtube.com/embed/1roy4o4tqQM'},
+      {id:3,title:'Cyber City',year:2025,poster:'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=600&auto=format&fit=crop&ixlib=rb-4.0.3&s=3c5b4a6d0f',desc:'Futuristic noir set in a neon metropolis.',rating:'R',trailer:'https://www.youtube.com/embed/Vi0qjXyJ0Zc'},
+      {id:4,title:'Forest Whisper',year:2022,poster:'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=600&auto=format&fit=crop&ixlib=rb-4.0.3&s=8b2c2d3d4e',desc:'A serene tale of reconnection with nature.',rating:'G',trailer:'https://www.youtube.com/embed/dQw4w9WgXcQ'},
+      {id:5,title:'Space Between',year:2021,poster:'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=600&auto=format&fit=crop&ixlib=rb-4.0.3&s=1a2b3c4d5e',desc:'Sci-fi drama exploring memory and time.',rating:'PG-13',trailer:'https://www.youtube.com/embed/6ZfuNTqbHE8'},
+      {id:6,title:'Hidden Truths',year:2020,poster:'https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?q=80&w=600&auto=format&fit=crop&ixlib=rb-4.0.3&s=4c5d6e7f8a',desc:'A detective uncovers secrets that change everything.',rating:'R',trailer:'https://www.youtube.com/embed/EXeTwQWrcwY'}
+    ];
+
+    function createCard(movie){
+      const el = document.createElement('div');
+      el.className = 'card';
+      el.innerHTML = `
+        <img src="${movie.poster}" alt="${movie.title}">
+        <div class="meta">
+          <h4>${movie.title} <small style=\"color:var(--muted);font-weight:400;margin-left:6px\">(${movie.year})</small></h4>
+        </div>`;
+      el.addEventListener('click', ()=>openModal(movie));
+      return el;
+    }
+
+    // populate rows
+    const popularRow = document.getElementById('popularRow');
+    const trendingRow = document.getElementById('trendingRow');
+    const newRow = document.getElementById('newRow');
+
+    movies.forEach((m,i)=>{
+      // simple distribution
+      if(i%3===0) popularRow.appendChild(createCard(m));
+      if(i%3===1) trendingRow.appendChild(createCard(m));
+      if(i%3===2) newRow.appendChild(createCard(m));
+    });
+
+    // search
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', (e)=>{
+      const q = e.target.value.toLowerCase();
+      [popularRow, trendingRow, newRow].forEach(row=>{
+        Array.from(row.children).forEach(card=>{
+          const title = card.querySelector('h4').innerText.toLowerCase();
+          card.style.display = title.includes(q) ? '' : 'none';
+        })
+      })
+    });
+
+    // modal logic
+    const modal = document.getElementById('modal');
+    const closeModalBtn = document.getElementById('closeModal');
+    const mTitle = document.getElementById('mTitle');
+    const mDesc = document.getElementById('mDesc');
+    const mRating = document.getElementById('mRating');
+    const videoWrap = document.getElementById('videoWrap');
+
+    function openModal(movie){
+      mTitle.textContent = movie.title + ' (' + movie.year + ')';
+      mDesc.textContent = movie.desc;
+      mRating.textContent = movie.rating;
+      videoWrap.innerHTML = `<img src='${movie.poster}' style='width:100%;height:100%;object-fit:cover' alt='poste
